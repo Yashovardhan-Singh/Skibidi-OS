@@ -1,6 +1,3 @@
-# Linux only
-# Needs rework
-
 ASM_DIR := asm
 OUT_DIR := out
 OBJ_DIR := obj
