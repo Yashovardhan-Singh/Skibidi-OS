@@ -2,12 +2,8 @@
 ; Stage-1 (Creating an OS)
 ; Volt-A-Bit, Manipal Institute of Technology
 
-;--------------------
-; Sector 1          |
-;--------------------
-
 bits 16                     ; 16 Bit, starts in real mode
-org 0x7c00                  ; Load from.
+org 0x7c00                  ; Load from
 
 ; Entry
 start:
@@ -18,7 +14,7 @@ start:
     mov bx, 0x0000          ; setup for ES
     mov es, bx              ; load ES with 0x0000
     mov bx, 0x7e00          ; Memory address where sectors will be stored
-    mov al, 0x04            ; Number of sectors to load: 4 (512*4=2048 bytes=2KiB)
+    mov al, 0x04            ; Number of sectors to load: 4 (512*4=512 bytes=0.5KiB)
     call readsectors        ; Call to function
 
     mov si, done_s_msg      ; Confirmation message
@@ -39,11 +35,34 @@ enable_protected_mode:
     or eax, 0x1             ; Set bit 0 to 1 (enable protection mode)
     mov cr0, eax            ; Write back to control register 0
 
+    ; Setup segments
+    mov ax, 0x10            ; move data entry (No 2.) of gdt into AL
+    mov ds, ax              ; Set data segment
+    mov ss, ax              ; set stack segment
+    mov es, ax              ; set Extra segment
+    mov fs, ax              ; set FS
+    mov gs, ax              ; set GS
+
+    mov esp, 0x9CF00        ; Setup stack
+
     jmp 0x08:protected_mode ; Far jump to protected mode (32-Bit Land)
+
+bits 32                     ; 32 Bit code, protected mode
+
+; Entry for protected mode
+protected_mode:
+
+    mov eax, 0x7e00
+    jmp eax
+
+    cli
+    hlt
 
 ;------------------------------
 ; FUNCTIONS                   |
 ;------------------------------
+
+bits 16                     ; Set it back to 16 bit code
 
 ; Print messages to screen
 ; @parameter si: pointer to the message
@@ -51,20 +70,15 @@ printstr:
     mov ah, 0x0e            ; Set to teletype mode
     mov bx, 0x0007          ; Page 0, Set white on black
 .loop:
-    lodsb                   ; load next byte
+    mov al, [si]            ; mov into al, *SI
     or al, al               ; test for null byte
     jz .exit                ; string printed
     int 0x10                ; interrupt
+    inc si
     jmp .loop               ; Jump back to loop
-.exit: ret
-
-; Print single char to screen
-; @parameter al: the character to print
-printchar:
-    mov ah, 0x0e            ; Set to teletype mode
-    mov bx, 0x0007          ; Page 0, Set white on black
-    int 0x10                ; interrupt
-.exit: ret
+.exit:
+    call newline
+    ret
 
 ; @parameter al: number of sectors to load
 ; @parameter es: which segment (optional, for now)
@@ -81,6 +95,20 @@ readsectors:
     call printstr           ; call print
     jmp .exit                 ; jump to end of execution
 .exit: ret
+
+; newline function
+; @parameter: none
+newline:
+    mov ah, 0x03            ; Get cursor data
+    mov bh, 0               ; Page number
+    int 0x10                ; Interrupt 16/10h
+
+    inc dh                  ; Last interrupt returned row position in DH
+    mov dl, 0               ; Set to first column
+    mov ah, 0x02            ; Change interrupt to move cursor
+    int 0x10                ; Interrupt
+
+    ret
 
 ;-----------------------
 ; DATA                 |
@@ -116,32 +144,3 @@ idt_descriptor:
 ; $ - $$: size of our code, 510 - ($ - $$): size of padding
 times 510 - ($ - $$) db 0
 dw 0xaa55                   ; Magic number
-
-;------------------------
-; Sector 2              |
-;------------------------
-
-;------------------------
-; 32 BIT CODE           |
-;------------------------
-
-bits 32                     ; 32 Bit code, protected mode
-
-; Entry for protected mode
-protected_mode:
-    ; Setup segments
-    mov ax, 0x10            ; move data entry (No 2.) of gdt into AL
-    mov ds, ax              ; Set data segment
-    mov ss, ax              ; set stack segment
-    mov es, ax              ; set Extra segment
-    mov fs, ax              ; set FS
-    mov gs, ax              ; set GS
-
-    cli                     ; Clear interrups
-    hlt                     ; halt
-
-; Segment padding (Debug values)
-times 1024 - ($ - $$) db 'A'; Sector 2
-times 1536 - ($ - $$) db 'B'; Sector 3
-times 2048 - ($ - $$) db 'C'; Sector 4
-times 2560 - ($ - $$) db 'D'; Sector 5
