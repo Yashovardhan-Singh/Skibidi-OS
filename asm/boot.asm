@@ -14,7 +14,7 @@ start:
     mov bx, 0x0000          ; setup for ES
     mov es, bx              ; load ES with 0x0000
     mov bx, 0x7e00          ; Memory address where sectors will be stored
-    mov al, 0x04            ; Number of sectors to load: 4 (512*4=512 bytes=0.5KiB)
+    mov al, 0x4             ; Number of sectors to load: 4 (512*4=512 bytes=0.5KiB)
     call readsectors        ; Call to function
 
     mov si, done_s_msg      ; Confirmation message
@@ -22,10 +22,10 @@ start:
 
 ; Setup protected mode
 enable_protected_mode:
-    cli                     ; clear interrupts
-
     lgdt [gdt_descriptor]   ; load GDT
     lidt [idt_descriptor]   ; load IDT
+
+    cli                     ; clear interrupts
 
     in al, 0x92             ; use port 0x92 (fast A20 gate)
     or al, 2                ; Set BIT 1 of A20 gate to 1
@@ -35,16 +35,6 @@ enable_protected_mode:
     or eax, 0x1             ; Set bit 0 to 1 (enable protection mode)
     mov cr0, eax            ; Write back to control register 0
 
-    ; Setup segments
-    mov ax, 0x10            ; move data entry (No 2.) of gdt into AL
-    mov ds, ax              ; Set data segment
-    mov ss, ax              ; set stack segment
-    mov es, ax              ; set Extra segment
-    mov fs, ax              ; set FS
-    mov gs, ax              ; set GS
-
-    mov esp, 0x9CF00        ; Setup stack
-
     jmp 0x08:protected_mode ; Far jump to protected mode (32-Bit Land)
 
 bits 32                     ; 32 Bit code, protected mode
@@ -52,8 +42,18 @@ bits 32                     ; 32 Bit code, protected mode
 ; Entry for protected mode
 protected_mode:
 
-    mov eax, 0x7e00
-    jmp eax
+    mov ax, 0x10            ; Data to ax
+    mov ds, ax              ; setup data seg
+    mov ss, ax              ; stack seg
+    mov es, ax              ; extra seg
+    mov fs, ax              ; fs
+    mov gs, ax              ; gs
+
+    mov esp, 0x9cf00        ; stack pointer
+    mov ebp, esp            ; base pointer
+
+    ; TODO: find a better way to jump to kernel entry than memory locations
+    jmp 0x8:0x7e70          ; jump to kernel
 
     cli
     hlt

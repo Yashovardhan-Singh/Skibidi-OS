@@ -1,30 +1,29 @@
-OUTPUT_FORMAT(binary)
-
-ENTRY(_start)
+OUTPUT_FORMAT(elf32-i386)
+OUTPUT_ARCH(i386)
+ENTRY(kernel_main)
 
 SECTIONS
 {
-    . = 0x7e00;
+    . = 0x7E00;  /* Kernel entry point */
 
-    .trxt BLOCK(4K) : ALIGN(4K)
-    {
+    .text ALIGN(512) : {
         *(.text)
     }
 
-    .rodata BLOCK(4K) : ALIGN(4K)
-    {
+    .rodata ALIGN(512) : {
         *(.rodata)
     }
 
-    .data BLOCK(4K) : ALIGN(4K)
-    {
+    .data ALIGN(512) : {
         *(.data)
     }
 
-    .bss BLOCK(4K) : ALIGN(4K)
-    {
+    .bss ALIGN(512) : {
+        __bss_start = .;
         *(.bss)
+        *(COMMON)
+        __bss_end = .;
     }
 
-    end = .;
+    . = ALIGN(512);
 }
