@@ -7,6 +7,7 @@ SECTIONS
     . = 0x7E00;  /* Kernel entry point */
 
     .text ALIGN(512) : {
+        *(.text.entry)
         *(.text)
     }
 

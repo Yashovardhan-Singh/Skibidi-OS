@@ -1,6 +1,8 @@
-#ifndef UTILS_H
-#define UTILS_H
+#pragma once
+
+#include "colors.h"
+#include "size.h"
 
 int strlen(char* msg);
-
-#endif
+void pts(unsigned short* mem, char* msg, int attrib, int* cursor);
+int vga_attrib(FgColor fg, BgColor bg);

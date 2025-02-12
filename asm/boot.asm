@@ -52,8 +52,7 @@ protected_mode:
     mov esp, 0x9cf00        ; stack pointer
     mov ebp, esp            ; base pointer
 
-    ; TODO: find a better way to jump to kernel entry than memory locations
-    jmp 0x8:0x7e70          ; jump to kernel
+    jmp 0x8:0x7e00          ; jump to kernel
 
     cli
     hlt
