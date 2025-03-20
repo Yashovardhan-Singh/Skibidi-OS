@@ -13,7 +13,8 @@ void kernel_main() {
     PICInit();
     PICEnableIrq(0);
 
-    // __asm__ volatile ("sti");    // NIGHTMARE
+    // asm("sti");    // NIGHTMARE
+    asm("int $32");
 
     i32 color_scheme = vga_attrib(FG_BLUE, BG_GREEN);
     clear_color(color_scheme);

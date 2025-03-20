@@ -38,3 +38,7 @@ typedef unsigned long ptr;
 //     while (num--) *p++ = (unsigned char)value;
 //     return ptr;
 // }
+
+#ifndef asm
+#define asm __asm__ volatile
+#endif  

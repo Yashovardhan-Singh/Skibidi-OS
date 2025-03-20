@@ -46,6 +46,11 @@ IsrCommon:
     add esp, 8
     iret
 
+; global isr32
+; isr32:
+;     cli
+;     iret
+
 %assign i 0
 %rep 256
     %if i in (8, 10, 11, 12, 13, 14, 17)
