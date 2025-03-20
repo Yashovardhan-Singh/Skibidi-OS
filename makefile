@@ -24,7 +24,7 @@ CCFLAGS+= -nostdlib -nostdinc -ffreestanding -fno-pic -fno-stack-protector
 CCFLAGS+= -fno-builtin-function -fno-builtin
 
 KERNEL_C_SRC = $(wildcard src/*.c)
-BOOT_ASM_SRC = $(wildcard asm/*.asm)
+BOOT_ASM_SRC = $(filter-out asm/boot.asm, $(wildcard asm/*.asm))
 KERNEL_OBJS = $(patsubst src/%.c,$(OBJ_DIR)/%.o,$(KERNEL_C_SRC))
 BOOT_OBJS = $(patsubst asm/%.asm,$(OBJ_DIR)/%.o,$(BOOT_ASM_SRC))
 
@@ -35,13 +35,14 @@ $(OBJ_DIR)/%.o: src/%.c | pre-config
 	$(CC) $(CCFLAGS) -c $< -o $@
 
 $(OBJ_DIR)/%.o: asm/%.asm
-	$(NASM) $< -o $@ $(NFLAGS)
+	$(NASM) $< -o $@ -f elf32
 
 pre-config:
 	@$(MKDIR) $(OUT_DIR) $(OBJ_DIR)
 .PHONY: pre-config
 
 bootloader:
+	echo $(BOOT_ASM_SRC)
 	$(NASM) $(ASM_DIR)/boot.asm -o $(BOOTLOADER) $(NFLAGS)
 .PHONY: bootloader
 
@@ -49,15 +50,15 @@ run: iso
 	qemu-system-i386 $(QFLAGS)
 .PHONY: run
 
-kernel: $(KERNEL_OBJS)
+kernel: $(KERNEL_OBJS) $(BOOT_OBJS)
 	$(LD) $(LDFLAGS) -o $(KERNEL_ELF) $^
 	objcopy -O binary out/kernel.elf out/kernel.bin
 .PHONY: kernel
 
 iso: pre-config bootloader kernel
-	dd if=/dev/zero of=$(ISO_IMAGE) bs=512 count=5
+	dd if=/dev/zero of=$(ISO_IMAGE) bs=512 count=129
 	dd if=$(BOOTLOADER) of=$(ISO_IMAGE) bs=512 count=1 seek=0 conv=notrunc
-	dd if=$(KERNEL_BIN) of=$(ISO_IMAGE) bs=512 count=1 seek=1 conv=notrunc
+	dd if=$(KERNEL_BIN) of=$(ISO_IMAGE) bs=512 count=5 seek=1 conv=notrunc
 .PHONY: iso
 
 clean:

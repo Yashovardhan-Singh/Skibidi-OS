@@ -12,4 +12,4 @@ Skibidi OS is a brand new OS that does nothing new feature wise. It's only purpo
 You really do have the attention span of a goldfish. Anyhow: **USELESS OS, BUT IT WORKS SO REFER FROM IT**
 
 ## Screenshots
-![Boot Screen](img/250207_20h18m37s_screenshot.png)
+![Boot Screen](img/os_ss.png)

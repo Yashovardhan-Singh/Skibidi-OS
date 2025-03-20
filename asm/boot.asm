@@ -14,7 +14,7 @@ start:
     mov bx, 0x0000          ; setup for ES
     mov es, bx              ; load ES with 0x0000
     mov bx, 0x7e00          ; Memory address where sectors will be stored
-    mov al, 0x4             ; Number of sectors to load: 4 (512*4=512 bytes=0.5KiB)
+    mov al, 0x80             ; Number of sectors to load: 128 (512*128=64KiB)
     call readsectors        ; Call to function
 
     mov si, done_s_msg      ; Confirmation message
@@ -37,11 +37,14 @@ enable_protected_mode:
 
     jmp 0x08:protected_mode ; Far jump to protected mode (32-Bit Land)
 
+error:
+    cli
+    hlt
+
 bits 32                     ; 32 Bit code, protected mode
 
 ; Entry for protected mode
 protected_mode:
-
     mov ax, 0x10            ; Data to ax
     mov ds, ax              ; setup data seg
     mov ss, ax              ; stack seg
@@ -53,9 +56,6 @@ protected_mode:
     mov ebp, esp            ; base pointer
 
     jmp 0x8:0x7e00          ; jump to kernel
-
-    cli
-    hlt
 
 ;------------------------------
 ; FUNCTIONS                   |
@@ -85,14 +85,14 @@ printstr:
 readsectors:
     mov ah, 0x02            ; intterupt 2h    
     mov cx, 0x0002          ; high is cylinder: 0, low is sector(1 indexing): 2
-    mov dx, 0x0080          ; high is sector: 0, low is disk: 0x80h (80 is first drive/HDD)
+    mov dx, 0x0080          ; high is head: 0, low is disk: 0x80h (80 is first drive/HDD)
     int 0x13                ; interrupt
     jc .error               ; jump to error handling subroutine
     jmp .exit               ; return from subroutine
 .error:
     mov si, err_load_s_msg  ; print error message
     call printstr           ; call print
-    jmp .exit                 ; jump to end of execution
+    jmp error                 ; jump to end of execution
 .exit: ret
 
 ; newline function

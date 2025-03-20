@@ -1,17 +1,22 @@
 #include "utils.h"
+#include "size.h"
 
-static int cursor = 0;
+#include "idt.h"
+#include "pic.h"
 
-__attribute__((section(".text.entry")))
+static u16 cursor = 0;
+
 void kernel_main() {
-    unsigned short* VGA_MEMORY = (unsigned short*) (0xb8000);
-    
-    for (int i = 0; i < 2000; i++) VGA_MEMORY[i] = vga_attrib(FG_WHITE, BG_BLACK);
-    
-    pts(VGA_MEMORY, "HELLO,\tBRO  \n", vga_attrib(FG_WHITE, BG_BLACK), &cursor);
-    pts(VGA_MEMORY, "HELLO,\tBRO 2\n", vga_attrib(FG_WHITE, BG_BLACK), &cursor);
-    pts(VGA_MEMORY, "HELLO,\tBRO 3\n", vga_attrib(FG_WHITE, BG_BLACK), &cursor);
-    
-    // Forever loop
+
+    IDTInit();
+
+    PICInit();
+    PICEnableIrq(0);
+
+    // __asm__ volatile ("sti");    // NIGHTMARE
+
+    i32 color_scheme = vga_attrib(FG_BLUE, BG_GREEN);
+    clear_color(color_scheme);
+    print("Hello guys drink tea", color_scheme, &cursor);
     for (;;);
 }

@@ -4,7 +4,7 @@ ENTRY(kernel_main)
 
 SECTIONS
 {
-    . = 0x7E00;  /* Kernel entry point */
+    . = 0x7E00;
 
     .text ALIGN(512) : {
         *(.text.entry)
