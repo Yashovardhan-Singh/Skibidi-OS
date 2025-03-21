@@ -9,10 +9,8 @@ i32 strlen(char* msg) {
 }
 
 void print(char* msg, i32 attrib, u16* cursor) {
-
     u16* mem = (u16*) (0xb8000);
-    i32 n = strlen(msg);
-    
+    i32 n = strlen(msg);  
     for (i32 i = 0; i < n; i++) {
         do { switch (msg[i]) {
             case '\n':

@@ -58,7 +58,7 @@ kernel: $(KERNEL_OBJS) $(BOOT_OBJS)
 iso: pre-config bootloader kernel
 	dd if=/dev/zero of=$(ISO_IMAGE) bs=512 count=129
 	dd if=$(BOOTLOADER) of=$(ISO_IMAGE) bs=512 count=1 seek=0 conv=notrunc
-	dd if=$(KERNEL_BIN) of=$(ISO_IMAGE) bs=512 count=5 seek=1 conv=notrunc
+	dd if=$(KERNEL_BIN) of=$(ISO_IMAGE) bs=512 seek=1 conv=notrunc
 .PHONY: iso
 
 clean:
