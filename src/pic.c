@@ -42,7 +42,7 @@ void PICEnableIrq(u8 irq) {
     outb(port, mask);
 }
 
-// I/O port helpers (assuming size.h or elsewhere defines these)
+// I/O port helpers (assuming utils.h or elsewhere defines these)
 u8 inb(u16 port) {
     u8 ret;
     __asm__ volatile ("inb %1, %0" : "=a"(ret) : "Nd"(port));

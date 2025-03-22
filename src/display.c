@@ -1,12 +1,5 @@
 #include "colors.h"
-#include "size.h"
-
-i32 strlen(char* msg) {
-    i32 len = 0;
-    if (msg == 0) return 0;
-    while (msg[len] != '\0') len++;
-    return len;
-}
+#include "utils.h"
 
 void print(char* msg, i32 attrib, u16* cursor) {
     u16* mem = (u16*) (0xb8000);

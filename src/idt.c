@@ -1,6 +1,7 @@
 #include "idt.h"
-
 #include "colors.h"
+#include "pic.h"
+#include "utils.h"
 
 IDTEntry idt[256];
 IDTPointer idtp;
@@ -64,11 +65,10 @@ void IDTInit() {
 
 void InterruptHandler(u32 *esp) {
     u32 int_num = esp[13];
+
     if (int_num >= 32 && int_num <= 47) { // PIC IRQs
         if (int_num >= 40) // Slave PIC
             outb(0xA0, 0x20); // Send EOI to slave
         outb(0x20, 0x20); // Send EOI to master
     }
-    // Add debug (e.g., print int_num) later
-    // __asm__ volatile ("hlt");
 }

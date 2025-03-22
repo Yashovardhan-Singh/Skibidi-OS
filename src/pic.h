@@ -13,6 +13,6 @@
 void PICInit(void);
 void PICEnableIrq(u8 irq);
 
-// I/O port helpers (assuming size.h or elsewhere defines these)
+// I/O port helpers (assuming utils.h or elsewhere defines these)
 u8 inb(u16 port);
 void outb(u16 port, u8 val);
