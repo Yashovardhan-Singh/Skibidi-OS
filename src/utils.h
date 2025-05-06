@@ -41,6 +41,20 @@ typedef unsigned long ptr;
 // no padding
 #define PACKED __attribute__((packed))
 
+// PIC constants
+#define PIC1_CMD  0x20  // Master PIC command port
+#define PIC1_DATA 0x21  // Master PIC data port
+#define PIC2_CMD  0xA0  // Slave PIC command port
+#define PIC2_DATA 0xA1  // Slave PIC data port
+
+#define ICW1_INIT 0x11  // Initialize PIC
+#define ICW4_8086 0x01  // 8086/88 mode
+
+// Display constants
+#define VIDEO_MEMORY 0xB8000
+#define SCREEN_WIDTH 80
+#define SCREEN_HEIGHT 25
+
 // memset
 static inline void *memset(void *ptr, u8 value, usize n) {
     u8 *p = (u8*) ptr;
@@ -61,4 +75,14 @@ static inline usize strlen(char* msg) {
     usize len = 0;
     while (*(msg++) != 0) len++;
     return len;
+}
+
+static u8 inb(u16 port) {
+    u8 ret;
+    asm("inb %1, %0" : "=a"(ret) : "Nd"(port));
+    return ret;
+}
+
+static void outb(u16 port, u8 val) {
+    asm("outb %0, %1" : : "a"(val), "Nd"(port));
 }

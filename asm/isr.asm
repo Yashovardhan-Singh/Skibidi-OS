@@ -3,6 +3,7 @@ bits 32
 section .text
 
 extern InterruptHandler
+extern KeyboardFix
 
 %macro ISR_NO_ERR 1
 global isr%1
@@ -45,11 +46,6 @@ IsrCommon:
     popa
     add esp, 8
     iret
-
-; global isr32
-; isr32:
-;     cli
-;     iret
 
 %assign i 0
 %rep 256

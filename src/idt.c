@@ -2,9 +2,11 @@
 #include "colors.h"
 #include "pic.h"
 #include "utils.h"
+#include "display.h"
 
 IDTEntry idt[256];
 IDTPointer idtp;
+
 void (*isr_table[256])(void) = {
     isr0, isr1, isr2, isr3, isr4, isr5, isr6, isr7,
     isr8, isr9, isr10, isr11, isr12, isr13, isr14, isr15,
@@ -60,11 +62,19 @@ void IDTInit() {
         IDTSetGate(i, (u32)isr_table[i], 0x08, 0x8E);
     }
 
-    __asm__ volatile ("lidt %0" : : "m" (idtp));
+    asm("lidt %0" : : "m" (idtp));
+}
+
+void keyboard() {
+    u8 scancode = inb(0x60);
+    print_hex(scancode, FG_WHITE, BG_BLACK);
+    print("SOMETHING PLEASE", vga_attrib(FG_WHITE, FG_BLACK), 0);
 }
 
 void InterruptHandler(u32 *esp) {
     u32 int_num = esp[13];
+
+    if (int_num == 33) keyboard();
 
     if (int_num >= 32 && int_num <= 47) { // PIC IRQs
         if (int_num >= 40) // Slave PIC

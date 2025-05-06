@@ -26,7 +26,7 @@ _start:
     call PICEnableIrq       ; Enable IRQ 1
     add esp, 4              ; Clean stack
 
-    sti                     ; Store interrupts
+    sti                     ; Start interrupts
 
     call kernel_main        ; Call kernel
     jmp $                   ; Hang? idk, it's just a fallback
